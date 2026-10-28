@@ -1,0 +1,89 @@
+# 📚 Study Buddy
+
+A Streamlit app that turns your study notes into:
+
+- a short **summary** and **key points**
+- **flashcards** (download as CSV and import into Anki or Quizlet)
+- a **multiple-choice quiz** you can take in the app, with a score and an explanation for every answer
+- a downloadable **study guide** (Markdown)
+
+Powered by Google Gemini Flash. Upload a PDF, DOCX or TXT file, or paste your notes.
+
+> The material is AI-generated from your notes. Check important facts against your original source.
+
+## How it works
+
+1. Text is extracted from your file (`pypdf`, `python-docx`) or taken from the text box.
+2. Gemini is asked for a strict JSON study pack: summary, key points, flashcards, quiz and tips.
+3. The app validates the output: it drops broken or duplicate questions, and shuffles the answer options so the correct answer is not predictable.
+4. You take the quiz in the app and get your score instantly.
+
+Your notes are treated as data in the AI prompt, so instructions hidden inside a document are ignored.
+
+## Settings (sidebar)
+
+| Setting | What it does |
+|---|---|
+| Gemini API key | Your key (or set it as a secret, see below) |
+| Model | Which Gemini Flash model to use, or enter your own under **Custom...** |
+| Quiz questions | 3 to 15 |
+| Flashcards | 5 to 20 |
+| Quiz difficulty | Easy, Medium or Hard |
+| Output language | Any language, for example English, Urdu, Spanish |
+
+## Run locally
+
+```bash
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Get a free API key at https://aistudio.google.com/apikey, then paste it in the sidebar or store it as a secret.
+
+### Store the key as a secret (recommended)
+
+Create `.streamlit/secrets.toml` (never commit this file):
+
+```toml
+GEMINI_API_KEY = "your-key-here"
+```
+
+The app looks for the key in this order: sidebar input, Streamlit secrets, `GEMINI_API_KEY` environment variable.
+
+## Deploy on Streamlit Community Cloud
+
+1. Push this repo to GitHub (`app.py`, `requirements.txt`, `README.md` in the root).
+2. Go to https://share.streamlit.io and sign in with GitHub.
+3. Click **Create app**, choose your repo, branch `main`, main file `app.py`.
+4. Open **Advanced settings → Secrets** and add: `GEMINI_API_KEY = "your-key-here"`
+5. Click **Deploy**.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| "Not enough text was found" | Your file may be a scanned image. Export a text-based PDF or paste the text. |
+| "API key was rejected" | Re-copy the key from Google AI Studio; check there are no spaces. |
+| "Rate limit or quota reached" | Wait a minute, or switch model. The free tier has low limits. |
+| "Model not found" | Pick another model, or use Custom... with a current model name from https://ai.google.dev/gemini-api/docs/models |
+| "Response was incomplete" | Ask for fewer questions and flashcards, then try again. |
+
+## Limitations
+
+- Only the first 60,000 characters of very long notes are used.
+- Images, diagrams and handwriting inside a PDF are not read.
+- Quiz questions come only from your notes, so thin notes give fewer items.
+
+## Privacy
+
+Your notes are sent to Google's Gemini API. The app itself stores nothing. A public deployment with your own API key lets other people use your quota.
+
+## Project structure
+
+```
+app.py             # Streamlit UI + Gemini logic
+requirements.txt   # Python dependencies
+README.md
+```
